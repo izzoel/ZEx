@@ -1,4 +1,4 @@
-# ZEX — Video Stream Extractor
+# ZEX — ZTV Extractor
 
 Script Python untuk memeriksa halaman film pada Cinema Zetware, mendeteksi pemutar video berbasis `vsembed`, dan mengidentifikasi URL master manifest HLS (`master.m3u8`) beserta pilihan resolusi yang tersedia.
 
