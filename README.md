@@ -4,8 +4,8 @@ A Python-based tool for inspecting video players and HLS manifests.
 
 **Choose your language / Pilih bahasa:**
 
-- 🇮🇩 [Bahasa Indonesia](README.id.md)
-- 🇬🇧 [English](README.en.md)
+- 🇮🇩 [Bahasa Indonesia](docs/id.md)
+- 🇬🇧 [English](docs/en.md)
 
 ## Quick Start
 
