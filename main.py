@@ -71,7 +71,7 @@ def health() -> dict[str, str]:
 
 @app.get("/extract", tags=["Extraction"])
 def extract(
-    m3u8_url: str = Query(
+    zetware_url: str = Query(
         ...,
         min_length=1,
         description="URL halaman tontonan Cinema Zetware",
@@ -82,7 +82,7 @@ def extract(
     ),
 ) -> dict[str, Any]:
 
-    parsed = urlparse(m3u8_url.strip())
+    parsed = urlparse(zetware_url.strip())
 
     if (
         parsed.scheme != "https"
@@ -100,13 +100,13 @@ def extract(
         # Catatan:
         # extractor.py saat ini belum mendukung enable_download.
         # Fungsi main() selalu menjalankan download jika stream ditemukan.
-        extract_main(m3u8_url.strip())
+        extract_main(zetware_url.strip())
 
         return {
             "status": "completed",
             "message": "Proses extractor selesai. Periksa log server untuk hasil ekstraksi.",
             "metadata": {
-                "url": m3u8_url.strip(),
+                "url": zetware_url.strip(),
             },
         }
 
