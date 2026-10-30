@@ -61,7 +61,7 @@ def cetak_hasil_rapi(judul, tmdb_id, daftar_resolusi):
 
 def main(url):
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=False)
+        browser = p.chromium.launch(headless=True)
         page = browser.new_page()
         
         # 1. Buka Halaman Film 
