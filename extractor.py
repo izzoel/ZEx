@@ -235,7 +235,19 @@ def main(url):
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Penggunaan: python extract.py <url>")
+        print("Penggunaan:")
+        print("  Movie     : python extractor.py <url_movie>")
+        print("  TV Series : python extractor.py <url_tv>")
+        print()
+        print("Contoh:")
+        print(
+            "  Movie     : python extractor.py "
+            '"https://cinema.zetware.id/watch/tmdb-mov-456"'
+        )
+        print(
+            "  TV Series : python extractor.py "
+            '"https://cinema.zetware.id/watch/tmdb-tv-456?season=1&episode=2"'
+        )
         sys.exit(1)
 
     url = sys.argv[1]
