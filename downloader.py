@@ -39,36 +39,48 @@ def unduh_dengan_ytdlp(
 ):
     garis = "=" * 65
 
+    # 1. Tentukan target folder penyimpanan
+    target_folder = "/storage/movies"
+    
+    # Buat folder jika belum ada agar tidak memicu FileNotFoundError
+    if not os.path.exists(target_folder):
+        try:
+            os.makedirs(target_folder, exist_ok=True)
+        except Exception as e:
+            print(f"[PERINGATAN] Gagal membuat direktori {target_folder}: {e}")
+            print("Unduhan akan disimpan di direktori saat ini.")
+            target_folder = "."
+
     # Bentuk nama file otomatis jika belum diberikan.
     if nama_output is None:
         judul_bersih = re.sub(r'[\\/*?:"<>|]', "", judul_film).strip()
         judul_bersih = re.sub(r"\s+", "_", judul_bersih)
 
         if season is not None and episode is not None:
-            nama_output = (
-                f"{judul_bersih}_S{season}E{episode}_{resolusi}.mp4"
-            )
+            nama_file_saja = f"{judul_bersih}_S{season}E{episode}_{resolusi}.mp4"
         else:
-            nama_output = f"{judul_bersih}_{resolusi}.mp4"
+            nama_file_saja = f"{judul_bersih}_{resolusi}.mp4"
+    else:
+        # Jika nama_output diisi via argumen CLI, ambil nama filenya saja
+        nama_file_saja = os.path.basename(nama_output)
 
-    # Pastikan ekstensi output tetap mp4.
-    if not nama_output.lower().endswith(".mp4"):
-        nama_output += ".mp4"
+    if not nama_file_saja.lower().endswith(".mp4"):
+        nama_file_saja += ".mp4"
+
+    # 2. Gabungkan folder target dengan nama file
+    path_penyimpanan_penuh = os.path.join(target_folder, nama_file_saja)
 
     print(f"\n{garis}")
     print(" MEMULAI PENGUNDUHAN VIDEO STREAMING ".center(65))
     print(garis)
     print(f" Judul     : {judul_film}")
     print(f" Resolusi  : {resolusi}")
-    print(f" Output    : {nama_output}")
+    print(f" Output    : {path_penyimpanan_penuh}")
     print(garis + "\n")
-
-    # Lanjutkan dengan ydl_opts, monitor, dan proses unduhan
-    # dari kode Anda yang sekarang.
-    
     
     ydl_opts = {
-        'outtmpl': nama_output,
+        # Gunakan path lengkap di outtmpl agar yt-dlp menulis ke folder tersebut
+        'outtmpl': path_penyimpanan_penuh,
 
         'http_headers': {
             'User-Agent': (
@@ -78,29 +90,23 @@ def unduh_dengan_ytdlp(
             ),
         },
 
-        # Gunakan downloader internal yt-dlp
         'concurrent_fragment_downloads': 1,
-
-        # Percobaan ulang ketika permintaan atau fragmen gagal
         'retries': 10,
         'fragment_retries': 10,
         'file_access_retries': 5,
-
-        # Jeda permintaan dan jeda antar-unduhan
         'sleep_interval_requests': 2,
         'sleep_interval': 1,
         'max_sleep_interval': 3,
-
         'quiet': True,
         'no_warnings': True,
     }
 
-    
     stop_event = threading.Event()
 
+    # Teruskan path_penyimpanan_penuh ke fungsi monitor agar memantau file yang benar
     monitor = threading.Thread(
         target=monitor_download,
-        args=(nama_output, stop_event, 1),
+        args=(path_penyimpanan_penuh, stop_event, 1),
         daemon=True,
     )
 
@@ -110,7 +116,7 @@ def unduh_dengan_ytdlp(
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             ydl.download([stream_url])
 
-        print(f"\n[BERHASIL] Video tersimpan: {nama_output}", flush=True)
+        print(f"\n[BERHASIL] Video tersimpan: {path_penyimpanan_penuh}", flush=True)
 
     except Exception as e:
         print(f"\n[GAGAL] Terjadi kesalahan: {e}", flush=True)
@@ -125,7 +131,6 @@ def monitor_download(nama_output, stop_event, interval=60):
 
     while not stop_event.is_set():
         try:
-            # Periksa file output dan file sementara yt-dlp.
             kandidat = [
                 nama_output,
                 nama_output + ".part",
@@ -164,20 +169,11 @@ def monitor_download(nama_output, stop_event, interval=60):
                     else:
                         status = "MENUNGGU"
 
-                # sys.stdout.write(
-                #     f"\r[{status}] | "
-                #     f"Size: {ukuran_mb:.2f} MB | "
-                #     f"Durasi: {durasi // 60}m {durasi % 60}s"
-                #     " " * 10
-                # )
-                # sys.stdout.flush()
-
                 ukuran_sebelumnya = ukuran
 
         except OSError as e:
             print(f"[MONITOR] Error: {e}", flush=True)
 
-        # Tunggu interval, tetapi tetap bisa dihentikan lebih awal.
         if stop_event.wait(interval):
             break
 
@@ -192,11 +188,9 @@ if __name__ == "__main__":
     url_stream = sys.argv[1]
     judul_film = sys.argv[2]
     resolusi = sys.argv[3]
-    nama_file = (
-        sys.argv[4]
-        if len(sys.argv) > 4
-        else f"{judul_film}_{resolusi}.mp4"
-    )
+    
+    # Ambil argumen ke-4 jika ada, jika tidak kosongkan dahulu (akan di-handle di fungsi)
+    nama_file = sys.argv[4] if len(sys.argv) > 4 else None
 
     unduh_dengan_ytdlp(
         stream_url=url_stream,
