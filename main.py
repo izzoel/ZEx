@@ -75,11 +75,7 @@ def extract(
         ...,
         min_length=1,
         description="URL halaman tontonan Cinema Zetware",
-    ),
-    enable_download: bool = Query(
-        True,
-        description="Aktifkan atau nonaktifkan download.",
-    ),
+    )
 ) -> dict[str, Any]:
 
     parsed = urlparse(m3u8_url.strip())
