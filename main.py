@@ -18,8 +18,9 @@ import logging
 from typing import Any
 from urllib.parse import urlparse
 
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Query, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 
 from extractor import main as extract_main
 
@@ -31,6 +32,9 @@ app = FastAPI(
     description="API untuk mendeteksi stream HLS dan menjalankan extractor ZEX.",
     version="1.0.0",
 )
+
+# Definisi Path Folder Storage Movies
+MOVIES_DIR = "/home/user/ZEx/storage/movies"
 
 # CORS
 cors_origins_env = os.getenv("CORS_ORIGINS", "*").strip()
@@ -61,6 +65,7 @@ def root() -> dict[str, str]:
         "status": "online",
         "docs": "/docs",
         "endpoint": "/extract",
+        "endpoint_movies": "/movies/{filename}",
     }
 
 
@@ -115,6 +120,21 @@ def extract(
             ),
         }
 
+    @app.get("/movies/{filename}", tags=["Storage"])
+    def download_movie(filename: str) -> FileResponse:
+        """Endpoint untuk mendownload file MP4 dari storage/movies."""
+        # Menghindari Path Traversal Attack dengan os.path.basename
+        safe_filename = os.path.basename(filename)
+        file_path = os.path.join(MOVIES_DIR, safe_filename)
+
+        if not os.path.isfile(file_path):
+            raise HTTPException(status_code=404, detail="File video tidak ditemukan.")
+
+        return FileResponse(
+            path=file_path,
+            filename=safe_filename,
+            media_type="video/mp4"
+        )
 
 if __name__ == "__main__":
     import uvicorn

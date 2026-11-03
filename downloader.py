@@ -40,7 +40,7 @@ def unduh_dengan_ytdlp(
     garis = "=" * 65
 
     # 1. Tentukan target folder penyimpanan
-    target_folder = "/storage/movies"
+    target_folder = "/home/user/ZEx/storage/movies"
     
     # Buat folder jika belum ada agar tidak memicu FileNotFoundError
     if not os.path.exists(target_folder):
