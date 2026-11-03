@@ -120,21 +120,21 @@ def extract(
             ),
         }
 
-    @app.get("/movies/{filename}", tags=["Storage"])
-    def download_movie(filename: str) -> FileResponse:
-        """Endpoint untuk mendownload file MP4 dari storage/movies."""
-        # Menghindari Path Traversal Attack dengan os.path.basename
-        safe_filename = os.path.basename(filename)
-        file_path = os.path.join(MOVIES_DIR, safe_filename)
+@app.get("/movies/{filename}", tags=["Storage"])
+def download_movie(filename: str) -> FileResponse:
+    """Endpoint untuk mendownload file MP4 dari storage/movies."""
+    # Menghindari Path Traversal Attack dengan os.path.basename
+    safe_filename = os.path.basename(filename)
+    file_path = os.path.join(MOVIES_DIR, safe_filename)
 
-        if not os.path.isfile(file_path):
-            raise HTTPException(status_code=404, detail="File video tidak ditemukan.")
+    if not os.path.isfile(file_path):
+        raise HTTPException(status_code=404, detail="File video tidak ditemukan.")
 
-        return FileResponse(
-            path=file_path,
-            filename=safe_filename,
-            media_type="video/mp4"
-        )
+    return FileResponse(
+        path=file_path,
+        filename=safe_filename,
+        media_type="video/mp4"
+    )
 
 if __name__ == "__main__":
     import uvicorn
